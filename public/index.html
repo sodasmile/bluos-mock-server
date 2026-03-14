@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BluOS Mock Player</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="player">
+
+    <!-- Header -->
+    <header>
+      <img src="bluesound-logo.png" alt="Bluesound" class="brand-logo" />
+      <div class="connection" id="connection">connecting…</div>
+    </header>
+
+    <!-- Album art + track info -->
+    <section class="now-playing">
+      <div class="artwork-wrap">
+        <img id="artwork" src="" alt="" />
+        <div class="artwork-placeholder" id="artworkPlaceholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="9" x2="12" y2="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="track-info">
+        <div class="service" id="service"></div>
+        <div class="title" id="title1">—</div>
+        <div class="artist" id="artist"></div>
+        <div class="album" id="album"></div>
+        <div class="format" id="format"></div>
+      </div>
+    </section>
+
+    <!-- Progress bar -->
+    <section class="progress-section">
+      <span class="time" id="timeCurrent">—</span>
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+        <input type="range" id="seekSlider" min="0" max="100" value="0" class="seek-slider" />
+      </div>
+      <span class="time" id="timeTotal">—</span>
+    </section>
+
+    <!-- Transport controls -->
+    <section class="transport">
+      <button class="btn-icon" id="btnShuffle" title="Shuffle" onclick="toggleShuffle()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 3 21 3 21 8"/>
+          <line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/>
+          <line x1="4" y1="4" x2="21" y2="21"/>
+        </svg>
+      </button>
+
+      <button class="btn-icon" onclick="api('/Back')" title="Previous">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="19 20 9 12 19 4 19 20"/>
+          <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+
+      <button class="btn-play" id="btnPlay" onclick="togglePlay()" title="Play / Pause">
+        <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <svg id="iconStop" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      </button>
+
+      <button class="btn-icon" onclick="api('/Skip')" title="Next">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 4 15 12 5 20 5 4"/>
+          <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+
+      <button class="btn-icon" id="btnRepeat" title="Repeat" onclick="cycleRepeat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="17 1 21 5 17 9"/>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <span class="repeat-badge" id="repeatBadge"></span>
+      </button>
+    </section>
+
+    <!-- Volume -->
+    <section class="volume-section">
+      <button class="btn-icon btn-mute" id="btnMute" onclick="toggleMute()" title="Mute">
+        <svg id="iconVolume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <svg id="iconMuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      </button>
+      <input type="range" id="volumeSlider" min="0" max="100" value="30" class="volume-slider" />
+      <span class="volume-value" id="volumeValue">30</span>
+    </section>
+
+    <!-- Presets -->
+    <section class="presets-section">
+      <div class="section-label">Presets</div>
+      <div class="presets" id="presets"></div>
+    </section>
+
+  </div>
+
+  <audio id="player" preload="none"></audio>
+  <script src="app.js"></script>
+</body>
+</html>

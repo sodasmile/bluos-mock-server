@@ -1,1 +1,10 @@
-__pycache__/
+node_modules/
+public/bluesound-logo.png
+
+# Local research / brainstorming — not part of the public project
+BLUOS_KNOWLEDGE_BANK.md
+nrk_streams.txt
+real_device_outputs/
+
+# Claude Code local config
+.claude/
