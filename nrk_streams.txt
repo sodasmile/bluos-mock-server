@@ -1,0 +1,13 @@
+NRK P3: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p3
+NRK Klassisk: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/klassisk
+NRK Nyheter: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/nyheter
+NRK Jazz: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/jazz
+NRK mP3: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/mp3
+NRK P1: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p1
+NRK P2: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p2
+NRK P3: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p3
+NRK Sport: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/sport
+NRK Folkemusikk: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/folkemusikk
+NRK Radio Super: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/radio_super
+NRK P1+: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p1pluss
+NRK P3 Musikk: https://lyd.nrk.no/icecast/mp3/high/s0w7hwn47m/p3musikk
