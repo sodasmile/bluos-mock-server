@@ -3,6 +3,7 @@ const { EventEmitter } = require('events');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+const { Bonjour } = require('bonjour-service');
 
 const app = express();
 const PORT = 11000;
@@ -61,6 +62,11 @@ function newEtag() {
 function volumeToDb(vol) {
   if (vol === 0) return -80;
   return Math.round((vol / 100) * 80 - 80);
+}
+
+function logEndpoint(path, params) {
+  const p = Object.keys(params).length ? JSON.stringify(params) : '';
+  console.log(`[API] ${path}${p ? ' ' + p : ''}`);
 }
 
 function escXml(str) {
@@ -189,6 +195,7 @@ app.get('/ui/presets', (_req, res) => res.json(presets));
 // ── 2.1  /Status ──────────────────────────────────────────────────────────────
 
 app.get('/Status', (req, res) => {
+  logEndpoint('/Status', req.query);
   longPoll(req, res, buildStatusXml, state.etag);
 });
 
@@ -236,6 +243,7 @@ function buildStatusXml() {
 // ── 2.2  /SyncStatus ─────────────────────────────────────────────────────────
 
 app.get('/SyncStatus', (req, res) => {
+  logEndpoint('/SyncStatus', req.query);
   longPoll(req, res, buildSyncStatusXml, state.syncStat);
 });
 
@@ -258,6 +266,7 @@ app.get('/Volume', handleVolume);
 app.post('/Volume', handleVolume);
 
 function handleVolume(req, res) {
+  logEndpoint('/Volume', req.query);
   const q = req.query;
 
   if (q.level !== undefined) {
@@ -307,6 +316,7 @@ function buildVolumeXml() {
 // ── 4.1  /Play ────────────────────────────────────────────────────────────────
 
 app.get('/Play', (req, res) => {
+  logEndpoint('/Play', req.query);
   const { url, seek } = req.query;
 
   if (url) {
@@ -342,6 +352,7 @@ app.get('/Play', (req, res) => {
 // Per spec: plain /Pause always pauses; /Pause?toggle=1 toggles.
 
 app.get('/Pause', (req, res) => {
+  logEndpoint('/Pause', req.query);
   const toggle = req.query.toggle === '1';
   if (toggle) {
     setState({ playerState: state.playerState === 'pause' ? 'play' : 'pause' });
@@ -353,7 +364,8 @@ app.get('/Pause', (req, res) => {
 
 // ── 4.3  /Stop ────────────────────────────────────────────────────────────────
 
-app.get('/Stop', (_req, res) => {
+app.get('/Stop', (req, res) => {
+  logEndpoint('/Stop', req.query);
   setState({ playerState: 'stop' });
   res.type('xml').send(xml(`<state>stop</state>`));
 });
@@ -361,7 +373,8 @@ app.get('/Stop', (_req, res) => {
 // ── 4.4  /Skip ────────────────────────────────────────────────────────────────
 // Per spec: response is <id>N</id> where N is the new track id.
 
-app.get('/Skip', (_req, res) => {
+app.get('/Skip', (req, res) => {
+  logEndpoint('/Skip', req.query);
   const nextSong = (state.song + 1) % Math.max(1, queue.length);
   setState({ secs: 0, song: nextSong, playerState: 'stream' });
   res.type('xml').send(xml(`<id>${nextSong}</id>`));
@@ -370,7 +383,8 @@ app.get('/Skip', (_req, res) => {
 // ── 4.5  /Back ────────────────────────────────────────────────────────────────
 // Per spec: response is <id>N</id> where N is the new track id.
 
-app.get('/Back', (_req, res) => {
+app.get('/Back', (req, res) => {
+  logEndpoint('/Back', req.query);
   if (state.secs > 4) {
     setState({ secs: 0 });
   } else {
@@ -383,6 +397,7 @@ app.get('/Back', (_req, res) => {
 // ── 4.6  /Shuffle ─────────────────────────────────────────────────────────────
 
 app.get('/Shuffle', (req, res) => {
+  logEndpoint('/Shuffle', req.query);
   if (req.query.state !== undefined) {
     setState({ shuffle: parseInt(req.query.state) === 1 ? 1 : 0 });
   }
@@ -396,6 +411,7 @@ app.get('/Shuffle', (req, res) => {
 // Per spec: response is <playlist length="..." id="..." repeat="N"/>
 
 app.get('/Repeat', (req, res) => {
+  logEndpoint('/Repeat', req.query);
   if (req.query.state !== undefined) {
     setState({ repeat: Math.min(2, Math.max(0, parseInt(req.query.state) || 0)) });
   }
@@ -406,14 +422,16 @@ app.get('/Repeat', (req, res) => {
 
 // ── 5.  Play Queue ────────────────────────────────────────────────────────────
 
-app.get('/Playlist', (_req, res) => {
+app.get('/Playlist', (req, res) => {
+  logEndpoint('/Playlist', req.query);
   res.type('xml').send(xml(
     `<playlist name="${escXml(queue.name)}" modified="${queue.modified}" ` +
     `length="${queue.length}" id="${queue.id}"/>`
   ));
 });
 
-app.get('/Clear', (_req, res) => {
+app.get('/Clear', (req, res) => {
+  logEndpoint('/Clear', req.query);
   queue = { id: queue.id + 1, name: '', length: 0, modified: 0, tracks: [] };
   res.type('xml').send(xml(
     `<playlist modified="0" length="0" id="${queue.id}"/>`
@@ -421,15 +439,18 @@ app.get('/Clear', (_req, res) => {
 });
 
 app.get('/Delete', (req, res) => {
+  logEndpoint('/Delete', req.query);
   const id = parseInt(req.query.id) || 0;
   res.type('xml').send(xml(`<deleted>${id}</deleted>`));
 });
 
 app.get('/Move', (req, res) => {
+  logEndpoint('/Move', req.query);
   res.type('xml').send(xml(`<moved>moved</moved>`));
 });
 
 app.get('/Save', (req, res) => {
+  logEndpoint('/Save', req.query);
   const name = req.query.name || '';
   queue.name = name;
   res.type('xml').send(xml(`<saved><entries>${queue.length}</entries></saved>`));
@@ -437,7 +458,8 @@ app.get('/Save', (req, res) => {
 
 // ── 6.  Presets ───────────────────────────────────────────────────────────────
 
-app.get('/Presets', (_req, res) => {
+app.get('/Presets', (req, res) => {
+  logEndpoint('/Presets', req.query);
   const inner = presets.map(p =>
     `  <preset id="${p.id}" name="${escXml(p.name)}" url="${escXml(p.url)}" image="${escXml(p.image)}" volume="${state.volume}"/>`
   ).join('\n');
@@ -448,6 +470,7 @@ app.get('/Preset', handlePreset);
 app.post('/Preset', handlePreset);
 
 function handlePreset(req, res) {
+  logEndpoint('/Preset', req.query);
   const rawId = req.query.id;
 
   // +1 / -1 cycle through presets relative to the currently active preset (prid)
@@ -489,7 +512,8 @@ function handlePreset(req, res) {
 
 // ── 7.  Browse (stub) ─────────────────────────────────────────────────────────
 
-app.get('/Browse', (_req, res) => {
+app.get('/Browse', (req, res) => {
+  logEndpoint('/Browse', req.query);
   res.type('xml').send(xml(
     `<browse sid="0" type="menu">` +
     `<item text="No services configured" type="link"/>` +
@@ -529,13 +553,15 @@ function proxyAudio(req, res, url, hops = 0) {
 }
 
 app.get('/proxy', (req, res) => {
+  logEndpoint('/proxy', req.query);
   const url = decodeURIComponent(req.query.url || '');
   proxyAudio(req, res, url);
 });
 
 // ── Sleep (stub) ──────────────────────────────────────────────────────────────
 
-app.get('/Sleep', (_req, res) => {
+app.get('/Sleep', (req, res) => {
+  logEndpoint('/Sleep', req.query);
   res.type('xml').send(xml(`<sleep></sleep>`));
 });
 
@@ -564,4 +590,31 @@ app.listen(PORT, () => {
   console.log(`BluOS mock server  →  http://localhost:${PORT}`);
   console.log(`Web UI             →  http://localhost:${PORT}/`);
   console.log(`API base           →  http://localhost:${PORT}/Status`);
+
+  // mDNS/DNS-SD service advertisement (Bonjour)
+  // Set MDNS_ENABLED=0 to disable (enabled by default)
+  const mdnsEnabled = process.env.MDNS_ENABLED !== '0';
+
+  if (mdnsEnabled) {
+    const bonjour = new Bonjour();
+    const mdns = bonjour.publish({
+      name: 'BluOS Mock',
+      type: 'bluos',
+      port: PORT,
+      txt: {
+        model: 'N180',
+        modelName: 'POWERNODE 2',
+        brand: 'Bluesound',
+        mac: '00:00:00:00:00:00',
+        version: '4.14.12',
+      },
+    });
+
+    console.log(`mDNS discovery    →  _bluos._tcp on port ${PORT} (MDNS_ENABLED=0 to disable)`);
+
+    // Clean up on shutdown
+    process.on('SIGINT', () => {
+      mdns.stop(() => bonjour.destroy());
+    });
+  }
 });

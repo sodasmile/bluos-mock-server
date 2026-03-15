@@ -16,6 +16,7 @@ A BluOS API-compatible mock server with a real-time web UI. Designed for testing
 - **Audio playback:** built-in presets (NRK, Radio Paradise) actually stream audio via a local proxy
 - **Long-polling** supported on `/Status` and `/SyncStatus` — real controllers work without modification
 - **Simulated network delay** via `API_DELAY_MS` env var to mimic real hardware latency
+- **mDNS/Bonjour** advertising — announces as `_bluos._tcp` for automatic discovery (opt-out via `MDNS_ENABLED=0`)
 
 ---
 
@@ -33,6 +34,20 @@ The default delay is 1000 ms. To disable it or use a different value:
 ```bash
 API_DELAY_MS=0 npm start
 API_DELAY_MS=500 npm start
+```
+
+### mDNS / Bonjour Discovery
+
+The mock server announces itself on the local network using **mDNS/DNS-SD** (Bonjour), simulating how real BluOS devices are discovered by home automation systems and controller apps.
+
+- **Service type:** `_bluos._tcp`
+- **Port:** `11000`
+- **Enabled by default**
+
+To disable mDNS advertising:
+
+```bash
+MDNS_ENABLED=0 npm start
 ```
 
 For auto-reload during development:
@@ -75,6 +90,9 @@ All endpoints follow the [BluOS Custom Integration API v1.7](https://bluos.io/wp
 | `GET /Save?name=<name>` | Save queue as playlist |
 | `GET /Browse` | Content browsing (stub) |
 | `GET /Sleep` | Sleep timer (stub) |
+| `GET /proxy?url=<encoded>` | Audio stream proxy (bypasses CORS) |
+
+**POST variants:** `/Volume` and `/Preset` also accept POST requests with query parameters.
 
 ---
 
@@ -98,17 +116,18 @@ Presets are defined in `server.js` and easy to extend.
 
 ```
 External controller / home automation
-        │  HTTP GET (BluOS API)
-        ▼
+         │  HTTP GET (BluOS API)
+         ▼
   Express server :11000
-        │
-        ├── State object (single source of truth)
-        │       │
-        │       ├── SSE push → Web UI (real-time)
-        │       └── Long-poll responses → API clients
-        │
-        ├── /proxy  →  pipes upstream audio streams (avoids CORS)
-        └── /public →  serves the web UI
+         │
+         ├── State object (single source of truth)
+         │       │
+         │       ├── SSE push → Web UI (real-time)
+         │       └── Long-poll responses → API clients
+         │
+         ├── mDNS / Bonjour → _bluos._tcp (network discovery)
+         ├── /proxy  →  pipes upstream audio streams (avoids CORS)
+         └── /public →  serves the web UI
 ```
 
 The web UI connects to `/ui/events` (Server-Sent Events) and receives the full player state on every change. UI controls call the same BluOS API endpoints as external clients — there is no separate UI-only control path.
