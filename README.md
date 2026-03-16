@@ -27,10 +27,17 @@ A BluOS API-compatible mock server with a real-time web UI. Designed for testing
 No dependencies required — just Docker.
 
 ```bash
-docker run -p 11000:11000 registry.gitlab.com/<your-namespace>/bluos-mock-server
+docker run --network host registry.gitlab.com/<your-namespace>/bluos-mock-server
 ```
 
-Or with Docker Compose:
+`--network host` lets the container join the host's network interface so mDNS multicast reaches the LAN (same as a bare Node.js process would). This works on **Linux** with Docker Engine. On Docker Desktop (macOS / Windows) host networking is not supported — mDNS will not work, but the HTTP API on port 11000 still does via port mapping:
+
+```bash
+# macOS / Windows — no mDNS
+docker run -p 11000:11000 -e MDNS_ENABLED=0 registry.gitlab.com/<your-namespace>/bluos-mock-server
+```
+
+Or with Docker Compose (uses host networking by default):
 
 ```bash
 docker compose up
@@ -59,7 +66,7 @@ API_DELAY_MS=500 npm start
 | Variable | Default | Description |
 |---|---|---|
 | `API_DELAY_MS` | `1000` | Simulated API latency in milliseconds |
-| `MDNS_ENABLED` | `0` (Docker) / `1` (Node.js) | Enable mDNS/Bonjour discovery |
+| `MDNS_ENABLED` | `1` | Enable mDNS/Bonjour discovery (requires host networking in Docker) |
 
 ### mDNS / Bonjour Discovery
 

@@ -2,8 +2,7 @@ services:
   bluos-mock-server:
     image: bluos-mock-server
     build: .
-    ports:
-      - "11000:11000"
+    network_mode: host   # required for mDNS multicast to reach the LAN
     environment:
       - API_DELAY_MS=0
-      - MDNS_ENABLED=0
+      - MDNS_ENABLED=1

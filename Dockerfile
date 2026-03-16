@@ -10,6 +10,6 @@ COPY . .
 EXPOSE 11000
 
 ENV API_DELAY_MS=1000 \
-    MDNS_ENABLED=0
+    MDNS_ENABLED=1
 
 CMD ["node", "server.js"]
