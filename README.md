@@ -22,6 +22,24 @@ A BluOS API-compatible mock server with a real-time web UI. Designed for testing
 
 ## Quick start
 
+### Docker (recommended)
+
+No dependencies required — just Docker.
+
+```bash
+docker run -p 11000:11000 registry.gitlab.com/<your-namespace>/bluos-mock-server
+```
+
+Or with Docker Compose:
+
+```bash
+docker compose up
+```
+
+Open `http://localhost:11000/` in a browser.
+
+### Node.js
+
 ```bash
 npm install
 npm start
@@ -35,6 +53,13 @@ The default delay is 1000 ms. To disable it or use a different value:
 API_DELAY_MS=0 npm start
 API_DELAY_MS=500 npm start
 ```
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `API_DELAY_MS` | `1000` | Simulated API latency in milliseconds |
+| `MDNS_ENABLED` | `0` (Docker) / `1` (Node.js) | Enable mDNS/Bonjour discovery |
 
 ### mDNS / Bonjour Discovery
 

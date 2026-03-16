@@ -1,0 +1,9 @@
+services:
+  bluos-mock-server:
+    image: bluos-mock-server
+    build: .
+    ports:
+      - "11000:11000"
+    environment:
+      - API_DELAY_MS=0
+      - MDNS_ENABLED=0

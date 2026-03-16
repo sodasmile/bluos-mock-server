@@ -1,0 +1,35 @@
+stages:
+  - build
+
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE
+
+build-and-push:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      # Always build and tag with the commit SHA
+      docker build -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA .
+
+      # Push the commit SHA tag
+      docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+
+      # On the default branch, also tag as 'latest'
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        docker tag $IMAGE_NAME:$CI_COMMIT_SHORT_SHA $IMAGE_NAME:latest
+        docker push $IMAGE_NAME:latest
+      fi
+
+      # On a semver tag (e.g. v1.2.3), also push that tag
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        docker tag $IMAGE_NAME:$CI_COMMIT_SHORT_SHA $IMAGE_NAME:$CI_COMMIT_TAG
+        docker push $IMAGE_NAME:$CI_COMMIT_TAG
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
